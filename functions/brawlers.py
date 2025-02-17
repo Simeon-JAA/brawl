@@ -31,10 +31,22 @@ def get_all_brawler_data(api_header: dict) -> list[dict]:
     return all_brawler_data
 
 
-def all_brawler_names(all_brawler_data: list[dict]) -> list[str]:
-    """Returns all brawler names"""
+def transform_all_brawler_names(all_brawler_data: list[dict]) -> list[str]:
+    """Returns all brawler names from complete list of all brawler data"""
+    
+    if not isinstance(all_brawler_data, list):
+        raise Exception("Error: Brawler data is not a list!")
+    
+    if not all_brawler_data:
+        raise Exception("Error: Bralwer list is empty!")
 
-    return [brawler["name"].capitalize() for brawler in all_brawler_data]
+    all_brawler_names = [brawler["name"].title() for brawler in all_brawler_data]
+
+    for brawler_name in all_brawler_names:
+        if not brawler_name:
+            raise Exception("Error: Brawler name is empty")
+
+    return all_brawler_names
 
 
 def all_brawler_ids(all_brawler_data: list[dict]) -> list[int]:
@@ -75,8 +87,4 @@ if __name__ =="__main__":
 
     for brawler in all_brawler_data:
         b.append(refine_brawler_data(brawler))
-
-
-
-
     
