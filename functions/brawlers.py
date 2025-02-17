@@ -17,13 +17,13 @@ def get_api_header(token: str) -> dict:
    return header
 
 
-def get_all_brawler_data(header_data: dict) -> list[dict]:
+def get_all_brawler_data(api_header: dict) -> list[dict]:
     """returns all brawler data"""
 
     try:
-        response = r.get(f"https://api.brawlstars.com/v1/brawlers", headers=header_data)
-        response = response.json()
-        all_brawler_data = response["items"]
+        response = r.get(f"https://api.brawlstars.com/v1/brawlers", headers=api_header)
+        response_data = response.json()
+        all_brawler_data = response_data["items"]
 
     except:
        raise Exception("Error: Unable to return brawler data")
@@ -42,24 +42,21 @@ def all_brawler_ids(all_brawler_data: list[dict]) -> list[int]:
 
     return [brawler["id"] for brawler in all_brawler_data]
 
-#TODO Finish function
-def refined_brawler_data(brawler_id: int, header_data: dict) -> dict:
+
+def refine_brawler_data(brawler_data: dict) -> dict:
     """Returns refined brawler data for a specific brawler to be used in frontend"""
 
-    if not isinstance(brawler_id, int):
-        raise Exception("Error: 'brawler_id' parameter is not integer.")
-    
-    brawler_data = {}
+    if not isinstance(brawler_data, dict):
+        raise Exception("Error: 'brawler data' parameter is not an object.")
+  
+    brawler_data_refined =  {}
 
-    try:
-        response = r.get(f"https://api.brawlstars.com/v1/{brawler_id}/definitions/", headers=header_data)
-        print(response.status_code)
-        data = response.json()
+    brawler_data_refined["id"] = brawler_data["id"]
+    brawler_data_refined["name"] = brawler_data["name"].capitalize()
+    brawler_data_refined["star_powers"] = [key["name"].capitalize() for key in brawler_data["starPowers"]]
+    brawler_data_refined["gadgets"] = [key["name"].capitalize() for key in brawler_data["gadgets"]]
 
-    except:
-        raise Exception("Error: Unable to retrieve brawler info.")
-    
-    return brawler_data
+    return brawler_data_refined
 
 
 if __name__ =="__main__":
@@ -74,7 +71,12 @@ if __name__ =="__main__":
 
     all_brawler_data = get_all_brawler_data(api_header)
 
-    print(all_brawler_data[0])
+    b = []
+
+    for brawler in all_brawler_data:
+        b.append(refine_brawler_data(brawler))
+
+
 
 
     
