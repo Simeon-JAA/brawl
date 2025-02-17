@@ -70,9 +70,11 @@ if __name__ =="__main__":
 
     token = config["api_token"]
 
-    api_header_ = get_api_header(token)
+    api_header = get_api_header(token)
 
-    # all_brawler_data = get_all_brawler_data(api_header)
+    all_brawler_data = get_all_brawler_data(api_header)
+
+    print(all_brawler_data[0])
 
 
     
