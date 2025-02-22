@@ -83,8 +83,8 @@ if __name__ =="__main__":
 
     all_brawler_data = get_all_brawler_data(api_header)
 
-    b = []
+    brawlers_refined = []
 
     for brawler in all_brawler_data:
-        b.append(refine_brawler_data(brawler))
+        brawlers_refined.append(refine_brawler_data(brawler))
     
