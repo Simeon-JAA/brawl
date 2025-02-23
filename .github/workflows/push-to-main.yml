@@ -6,6 +6,21 @@ on:
    - main
 
 jobs:
+ pylint_run:
+  name: "Run Pylint"
+  runs-on: ubuntu-latest
+  steps:
+   - name: clone repository
+     uses: actions/checkout@v3
+   - name: Install Python
+     uses: actions/setup-python@v4.6.0
+   - name: Install pylint
+     run: pip3 install pylint
+   - name: Install packages
+     run: pip3 install -r ./requirements.txt
+   - name: Python Linter on functions
+     run: pylint --fail-under=8 ./functions/*.py
+
  pytest_run:
   name: "Run Pytest"
   runs-on: ubuntu-latest
