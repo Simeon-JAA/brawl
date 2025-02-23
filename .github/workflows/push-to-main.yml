@@ -19,4 +19,4 @@ jobs:
    - name: Install packages
      run: pip3 install -r requirements.txt
    - name: Run pytest on all test files within functions folder
-     run: pytest ./functinos/test_*.py
+     run: pytest ./functions/test_*.py
