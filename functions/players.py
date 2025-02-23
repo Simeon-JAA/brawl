@@ -148,9 +148,22 @@ def refine_player_brawlers(player_data: dict) -> list[dict]:
       
 
     for item in player_brawler_data:
+          
           brawler_data = {to_snake_case(k): v for k, v in item.items() if k in brawler_keys}
+          brawler_data["name"] = brawler_data["name"].title()
+          
+          for gear in brawler_data["gears"]:
+              gear["name"] = gear["name"].title()
+
+          for star_power in brawler_data["star_powers"]:
+              star_power["name"] = star_power["name"].title()
           player_brawlers.append(brawler_data)
 
+          for gadget in brawler_data["gadgets"]:
+              gadget["name"] = gadget["name"].title()
+          player_brawlers.append(brawler_data)
+
+    
     return player_brawlers
 
 
@@ -174,4 +187,4 @@ if __name__ =="__main__":
 
     player_club_data = get_player_club_data(api_header=api_header, club_tag=player_club_tag)
     player_club_data = refine_player_club_data(player_club_data)
-  
+
