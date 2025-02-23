@@ -1,9 +1,13 @@
 """Scripts that return player data"""
 
-import requests as r
+import re
 from os import environ
 
+
+#TODO Replace requests with asyncio, aiohttp  
+import requests as r
 from dotenv import load_dotenv
+
 
 def get_api_header(token: str) -> dict:
    """Returns api header data"""
@@ -14,6 +18,21 @@ def get_api_header(token: str) -> dict:
    }
 
    return header
+
+
+def to_snake_case(text: str) -> str:
+    """Formats text to snake_case"""
+    
+    if not isinstance(text, str):
+        raise Exception("Error: Text should be a string!")
+    
+    text = text.replace(" ", "")
+    text = re.sub(r'([a-z0-9\s]{1})([A-Z]{1})', r'\1_\2', text)
+    
+    if not text:
+        raise Exception("Error: Text cannot be blank!")
+    
+    return text.lower()
 
 
 def format_player_tag(player_tag: str) -> str:
@@ -47,6 +66,20 @@ def check_player_tag(player_tag: str) -> bool:
     return True
 
 
+def format_club_tag(club_tag: str) -> str:
+    """Formats club tag"""
+
+    if not isinstance(club_tag, str):
+        raise Exception("Error: Club tag must be a string format!")
+    
+    club_tag = club_tag.strip().replace("#", "").upper()
+
+    if not club_tag:
+        raise Exception("Error: Club tag must not be empty!")
+    
+    return club_tag
+
+
 def get_player_data(api_header: dict, player_tag: str) -> dict:
     """Returns player data"""
     
@@ -67,20 +100,45 @@ def get_player_data(api_header: dict, player_tag: str) -> dict:
         raise Exception("Error: Invalid player tag.")
 
 
-#TODO get club data
-#TODO format keys to snake case
+def get_player_club_data(api_header: dict, club_tag: str) -> dict:
+    """Returns basic club data to include in plater stats"""
+    
+    club_tag = format_club_tag(club_tag)
+
+    try:
+        response = r.get(f"https://api.brawlstars.com/v1/clubs/%23{club_tag}", headers=api_header)
+        response_data = response.json()
+
+    except:
+        raise Exception("Error: Unable to retrieve club data")
+
+    return response_data
+
+
+def refine_player_club_data(club_data: dict) -> dict:
+    """Refined club data to returns desired data (to display alonsgide player info)"""
+
+    club_data_keys = ["name", "trophies",]
+    club_members = len(club_data["members"])
+    
+    club_data = {k: v for k, v in club_data.items() if k in club_data_keys}
+    club_data["members"] = club_members
+
+    return club_data
+
+
 def refine_player_stats(player_data: dict) -> dict:
     """Refined player data and returns chosen stats"""
 
     player_stats_keys = ["name", "trophies", "highestTrophies", "expLevel", "3vs3Victories",
                          "soloVictories", "duoVictories", "club"]
     
-    player_stats = {k: v for k, v in player_data if k in player_stats_keys}
+    player_stats = {to_snake_case(k): v for k, v in player_data.items() if k in player_stats_keys}
+    
 
     return player_stats
 
 
-#TODO format keys to snake case
 def refine_player_brawlers(player_data: dict) -> list[dict]:
     """Refines player data on brawler's and return a list of all brawlers"""
 
@@ -92,9 +150,22 @@ def refine_player_brawlers(player_data: dict) -> list[dict]:
       
 
     for item in player_brawler_data:
-          brawler_data = {k: v for k, v in item.items() if k in brawler_keys}
+          
+          brawler_data = {to_snake_case(k): v for k, v in item.items() if k in brawler_keys}
+          brawler_data["name"] = brawler_data["name"].title()
+          
+          for gear in brawler_data["gears"]:
+              gear["name"] = gear["name"].title()
+
+          for star_power in brawler_data["star_powers"]:
+              star_power["name"] = star_power["name"].title()
           player_brawlers.append(brawler_data)
 
+          for gadget in brawler_data["gadgets"]:
+              gadget["name"] = gadget["name"].title()
+          player_brawlers.append(brawler_data)
+
+    
     return player_brawlers
 
 
@@ -110,5 +181,12 @@ if __name__ =="__main__":
 
     #Curently using my playerID
     player_data = get_player_data(api_header, "8QC8RP02")
-    print(player_data)
-    # print(refine_player_brawlers(player_data))
+    
+    player_stats = refine_player_stats(player_data)
+    player_brawler_data = refine_player_brawlers(player_data)
+
+    player_club_tag = format_club_tag(player_stats["club"]["tag"])
+
+    player_club_data = get_player_club_data(api_header=api_header, club_tag=player_club_tag)
+    player_club_data = refine_player_club_data(player_club_data)
+
