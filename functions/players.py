@@ -1,8 +1,9 @@
 """Scripts that return player data"""
 
-import requests as r
+import re
 from os import environ
 
+import requests as r
 from dotenv import load_dotenv
 
 
@@ -15,6 +16,21 @@ def get_api_header(token: str) -> dict:
    }
 
    return header
+
+
+def to_snake_case(text: str) -> str:
+    """Formats text to snake_case"""
+    
+    if not isinstance(text, str):
+        raise Exception("Error: Text should be a string!")
+    
+    text = text.replace(" ", "")
+    text = re.sub(r'([a-z0-9\s]{1})([A-Z]{1})', r'\1_\2', text)
+    
+    if not text:
+        raise Exception("Error: Text cannot be blank!")
+    
+    return text.lower()
 
 
 def format_player_tag(player_tag: str) -> str:
@@ -109,20 +125,18 @@ def refine_player_club_data(club_data: dict) -> dict:
     return club_data
 
 
-#TODO get club data
-#TODO format keys to snake case
 def refine_player_stats(player_data: dict) -> dict:
     """Refined player data and returns chosen stats"""
 
     player_stats_keys = ["name", "trophies", "highestTrophies", "expLevel", "3vs3Victories",
                          "soloVictories", "duoVictories", "club"]
     
-    player_stats = {k: v for k, v in player_data.items() if k in player_stats_keys}
+    player_stats = {to_snake_case(k): v for k, v in player_data.items() if k in player_stats_keys}
+    
 
     return player_stats
 
 
-#TODO format keys to snake case
 def refine_player_brawlers(player_data: dict) -> list[dict]:
     """Refines player data on brawler's and return a list of all brawlers"""
 
@@ -134,7 +148,7 @@ def refine_player_brawlers(player_data: dict) -> list[dict]:
       
 
     for item in player_brawler_data:
-          brawler_data = {k: v for k, v in item.items() if k in brawler_keys}
+          brawler_data = {to_snake_case(k): v for k, v in item.items() if k in brawler_keys}
           player_brawlers.append(brawler_data)
 
     return player_brawlers
@@ -160,3 +174,4 @@ if __name__ =="__main__":
 
     player_club_data = get_player_club_data(api_header=api_header, club_tag=player_club_tag)
     player_club_data = refine_player_club_data(player_club_data)
+  
