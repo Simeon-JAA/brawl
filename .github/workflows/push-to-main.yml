@@ -1,0 +1,22 @@
+name: "Push-to-main"
+
+on:
+ pull_request:
+  branches:
+   - main
+
+jobs:
+ pytest_run:
+  name: "Run Pytest"
+  runs-on: ubuntu-latest
+  steps:
+   - name: clone repository
+     uses: actions/checkout@v3
+   - name: Install Python
+     uses: actions/setup-python@v4.6.0
+   - name: Install pytest
+     run: pip3 install pytest
+   - name: Install packages
+     run: pip3 install -r requirements.txt
+   - name: Run pytest on all test files within functions folder
+     run: pytest ./functinos/test_*.py
