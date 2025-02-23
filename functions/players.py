@@ -3,6 +3,8 @@
 import re
 from os import environ
 
+
+#TODO Replace requests with asyncio, aiohttp  
 import requests as r
 from dotenv import load_dotenv
 
