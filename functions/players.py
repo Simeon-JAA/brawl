@@ -24,13 +24,13 @@ def to_snake_case(text: str) -> str:
     """Formats text to snake_case"""
 
     if not isinstance(text, str):
-        raise Exception("Error: Text should be a string!")
+        raise TypeError("Error: Text should be a string!")
 
     text = text.replace(" ", "")
     text = re.sub(r'([a-z0-9\s]{1})([A-Z]{1})', r'\1_\2', text)
 
     if not text:
-        raise Exception("Error: Text cannot be blank!")
+        raise ValueError("Error: Text cannot be blank!")
 
     return text.lower()
 
@@ -39,12 +39,12 @@ def format_player_tag(player_tag: str) -> str:
     """Formats player tag"""
 
     if not isinstance(player_tag, str):
-        raise Exception("Error: Player tag must be a string format!")
+        raise TypeError("Error: Player tag must be a string format!")
 
     player_tag = player_tag.strip().replace("#", "").upper()
 
     if not player_tag:
-        raise Exception("Error: Player tag must not be empty!")
+        raise ValueError("Error: Player tag must not be empty!")
 
     return player_tag
 
@@ -70,12 +70,12 @@ def format_club_tag(club_tag: str) -> str:
     """Formats club tag"""
 
     if not isinstance(club_tag, str):
-        raise Exception("Error: Club tag must be a string format!")
+        raise TypeError("Error: Club tag must be a string format!")
 
     club_tag = club_tag.strip().replace("#", "").upper()
 
     if not club_tag:
-        raise Exception("Error: Club tag must not be empty!")
+        raise ValueError("Error: Club tag must not be empty!")
 
     return club_tag
 
@@ -89,11 +89,11 @@ def get_player_data(api_header: dict, player_tag: str) -> dict:
 
         try:
             response = r.get(f"https://api.brawlstars.com/v1/players/%23{player_tag}",
-                             headers=api_header)
+                             headers=api_header, timeout=5)
             response_data = response.json()
 
         except:
-            raise Exception("Error: Unable to retrieve player data.")
+            raise ConnectionError("Error: Unable to retrieve player data!")
 
         return response_data
 
@@ -104,7 +104,8 @@ def get_player_club_data(api_header: dict, club_tag: str) -> dict:
     club_tag = format_club_tag(club_tag)
 
     try:
-        response = r.get(f"https://api.brawlstars.com/v1/clubs/%23{club_tag}", headers=api_header)
+        response = r.get(f"https://api.brawlstars.com/v1/clubs/%23{club_tag}", 
+                         headers=api_header, tiemout=5)
         response_data = response.json()
 
     except:
