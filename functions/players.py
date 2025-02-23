@@ -67,10 +67,36 @@ def get_player_data(api_header: dict, player_tag: str) -> dict:
         raise Exception("Error: Invalid player tag.")
 
 
+#TODO get club data
+#TODO format keys to snake case
 def refine_player_stats(player_data: dict) -> dict:
     """Refined player data and returns chosen stats"""
 
-    return
+    player_stats_keys = ["name", "trophies", "highestTrophies", "expLevel", "3vs3Victories",
+                         "soloVictories", "duoVictories", "club"]
+    
+    player_stats = {k: v for k, v in player_data if k in player_stats_keys}
+
+    return player_stats
+
+
+#TODO format keys to snake case
+def refine_player_brawlers(player_data: dict) -> list[dict]:
+    """Refines player data on brawler's and return a list of all brawlers"""
+
+    player_brawler_data = player_data["brawlers"]
+
+    player_brawlers = []
+
+    brawler_keys = ["name", "power", "rank", "trophies", "starPowers", "gadgets", "gears"]
+      
+
+    for item in player_brawler_data:
+          brawler_data = {k: v for k, v in item.items() if k in brawler_keys}
+          player_brawlers.append(brawler_data)
+
+    return player_brawlers
+
 
 if __name__ =="__main__":
 
@@ -84,5 +110,5 @@ if __name__ =="__main__":
 
     #Curently using my playerID
     player_data = get_player_data(api_header, "8QC8RP02")
-    
     print(player_data)
+    # print(refine_player_brawlers(player_data))
