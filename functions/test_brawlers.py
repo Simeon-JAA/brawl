@@ -23,7 +23,7 @@ def test_all_brawler_names_base_case_2():
 def test_all_brawler_names_base_case_3():
     """Tests base case for all_brawler_names"""
 
-    result = transform_all_brawler_names([{"name": "EXAMPLE NAME"}, 
+    result = transform_all_brawler_names([{"name": "EXAMPLE NAME"},
                                           {"name": "EXAMPLENAME"}])
 
     assert result == ["Example Name", "Examplename"]
