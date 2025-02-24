@@ -24,7 +24,7 @@ def get_db_connection(config) -> connection:
 
 
 def insert_new_brarler_data(conn: connection, brawler_data: dict):
-    """Insterts new brawler data into the database"""
+    """Inserts new brawler data into the database"""
 
     with conn.cursor() as cur:
         try:
