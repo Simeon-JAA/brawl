@@ -24,15 +24,15 @@ CREATE TABLE starpower (
     FOREIGN KEY (brawler_id, brawler_version) REFERENCES brawler (brawler_id, brawler_version)
 );
 
-CREATE TABLE gatdget (
+CREATE TABLE gadget (
     id SMALLINT GENERATED ALWAYS AS IDENTITY,
-    gatdget_id INT NOT NULL,
-    gatdget_version SMALLINT NOT NULL,
+    gadget_id INT NOT NULL,
+    gadget_version SMALLINT NOT NULL,
     brawler_id INT NOT NULL,
     brawler_version SMALLINT NOT NULL,
-    gatdget_name TEXT NOT NULL,
+    gadget_name TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    PRIMARY KEY (gatdget_id, gatdget_version),
+    PRIMARY KEY (gadget_id, gadget_version),
     FOREIGN KEY (brawler_id, brawler_version) REFERENCES brawler (brawler_id, brawler_version)
     );
 
