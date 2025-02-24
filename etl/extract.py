@@ -6,30 +6,29 @@ import psycopg2
 from psycopg2.extensions import connection
 from dotenv import load_dotenv
 
-def get_db_connection(config) -> connection:
+def get_db_connection(config_env) -> connection:
     """Establishes connection with the database"""
 
     try:
-        conn = psycopg2.connect(dbname = config["dbname"],
-                         user = config["user"],
-                         password = config["password"],
-                         host = config["host"],
-                         port = config["port"]
+        db_connection = psycopg2.connect(dbname = config_env["dbname"],
+                         user = config_env["user"],
+                         password = config_env["password"],
+                         host = config_env["host"],
+                         port = config_env["port"]
         )
 
     except:
         raise ConnectionError("Error: Cannot establish connection to database!")
-    
-    return conn
+
+    return db_connection
 
 
-#TODO Finish function
-def get_most_recent_brawler_data(conn: connection):
+def get_most_recent_brawler_data(db_connection: connection):
     """Returns most recent brawler data in database"""
 
-    with conn.cursor() as cur:
+    with db_connection.cursor() as cur:
         try:
-            
+
             cur.execute("""SELECT b.brawler_id, brawler_version, brawler_name,
                         sp.starpower_id, sp.starpower_version, sp.starpower_name,
                         g.gadget_id, g.gadget_version, g.gadget_name,
@@ -42,7 +41,7 @@ def get_most_recent_brawler_data(conn: connection):
                         sp.starpower_id, sp.starpower_version, sp.starpower_name,
                         g.gadget_id, g.gadget_version, g.gadget_name
                         """)
-            
+
             most_recent_brawler_data = cur.fetchall()
 
         except:
@@ -52,7 +51,7 @@ def get_most_recent_brawler_data(conn: connection):
 
 
 if __name__ =="__main__":
-   
+
     load_dotenv()
 
     config = environ
@@ -62,4 +61,3 @@ if __name__ =="__main__":
     brawler_data = get_most_recent_brawler_data(conn)
 
     conn.close()
-        
