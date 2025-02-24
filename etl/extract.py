@@ -23,13 +23,26 @@ def get_db_connection(config) -> connection:
     return conn
 
 
+#TODO Finish function
 def get_most_recent_brawler_data(conn: connection):
     """Returns most recent brawler data in database"""
 
     with conn.cursor() as cur:
         try:
             
-            cur.execute("""""")
+            cur.execute("""SELECT b.brawler_id, brawler_version, brawler_name,
+                        sp.starpower_id, sp.starpower_version, sp.starpower_name,
+                        g.gadget_id, g.gadget_version, g.gadget_name,
+                        FROM brawler b
+                        INNER JOIN starpower sp ON 
+                        (b.brawler_id = sp.brawler_id AND b.brawler_version = sp.brawler_version)
+                        INNER JOIN gadget g ON 
+                        (b.brawler_id = g.brawler_id AND b.brawler_version = g.brawler_version)
+                        GROUP BY b.brawler_id, brawler_version, brawler_name,
+                        sp.starpower_id, sp.starpower_version, sp.starpower_name,
+                        g.gadget_id, g.gadget_version, g.gadget_name
+                        """)
+            
             most_recent_brawler_data = cur.fetchall()
 
         except:
