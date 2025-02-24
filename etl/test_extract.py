@@ -4,12 +4,11 @@ from unittest.mock import MagicMock
 
 
 import pytest
-import psycopg2
 from psycopg2.extensions import connection
 from extract import get_most_recent_brawler_data
 
 def test_get_most_recent_brawler_data_returns_conection():
-    """Tests get_most_recent_brawler_data returns connection"""
+    """Tests get_most_recent_brawler_data returns mock brawler data"""
 
     conn = MagicMock()
     mock_fetch = conn.cursor().__enter__().fetchall
