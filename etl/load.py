@@ -1,4 +1,4 @@
-"""Load file for loading chages into database"""
+"""Load file for loading changes into database"""
 
 from os import environ
 
