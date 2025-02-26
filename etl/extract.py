@@ -29,18 +29,32 @@ def get_most_recent_brawler_data(db_connection: connection):
     with db_connection.cursor() as cur:
         try:
 
-            cur.execute("""SELECT b.brawler_id, brawler_version, brawler_name,
-                        sp.starpower_id, sp.starpower_version, sp.starpower_name,
-                        g.gadget_id, g.gadget_version, g.gadget_name,
-                        FROM brawler b
-                        INNER JOIN starpower sp ON 
-                        (b.brawler_id = sp.brawler_id AND b.brawler_version = sp.brawler_version)
-                        INNER JOIN gadget g ON 
-                        (b.brawler_id = g.brawler_id AND b.brawler_version = g.brawler_version)
-                        GROUP BY b.brawler_id, brawler_version, brawler_name,
+            cur.execute("""SELECT b.brawler_id, b.brawler_version, b.brawler_name,
                         sp.starpower_id, sp.starpower_version, sp.starpower_name,
                         g.gadget_id, g.gadget_version, g.gadget_name
-                        """)
+                        FROM brawler b
+                        INNER JOIN (SELECT b_2.brawler_id, MAX(b_2.brawler_version) AS brawler_version
+                                    FROM brawler b_2
+                                    GROUP BY b_2.brawler_id) b_max
+                        ON b.brawler_id = b_max.brawler_id 
+                        AND b.brawler_version = b_max.brawler_version
+                        INNER JOIN starpower sp ON b.brawler_id = sp.brawler_id 
+                        AND b.brawler_version = sp.brawler_version
+                        INNER JOIN (SELECT sp_2.starpower_id, MAX(sp_2.starpower_version) AS starpower_version
+                                    FROM starpower sp_2
+                                    GROUP BY sp_2.starpower_id) sp_max
+                        ON sp.starpower_id = sp_max.starpower_id
+                        AND sp.starpower_version = sp_max.starpower_version
+                        INNER JOIN gadget g ON b.brawler_id = g.brawler_id 
+                        AND b.brawler_version = g.brawler_version
+                        INNER JOIN (SELECT g_2.gadget_id, MAX(g_2.gadget_version) AS gadget_version
+                                    FROM gadget g_2
+                                    GROUP BY g_2.gadget_id) g_max
+                        ON g.gadget_id = g_max.gadget_id
+                        AND g.gadget_version = g_max.gadget_version
+                        GROUP BY b.brawler_id, b.brawler_version, b.brawler_name,
+                        sp.starpower_id, sp.starpower_version, sp.starpower_name,
+                        g.gadget_id, g.gadget_version, g.gadget_name;""")
 
             most_recent_brawler_data = cur.fetchall()
 
@@ -59,5 +73,6 @@ if __name__ =="__main__":
     conn = get_db_connection(config)
 
     brawler_data = get_most_recent_brawler_data(conn)
+    print(brawler_data)
 
     conn.close()
