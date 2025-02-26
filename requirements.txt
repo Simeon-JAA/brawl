@@ -1,3 +1,4 @@
 python-dotenv
 requests
 pylint
+psycopg2-binary
