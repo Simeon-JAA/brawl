@@ -1,4 +1,4 @@
-"""Extract file for  chages into database"""
+"""Extract script to extract data from brawl API and database"""
 
 from os import environ
 
