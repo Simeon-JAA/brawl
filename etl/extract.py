@@ -1,9 +1,9 @@
 """Extract file for  chages into database"""
 
-import requests
 from os import environ
 
 import psycopg2
+import requests
 from psycopg2.extensions import connection
 from psycopg2.extras import DictCursor
 from dotenv import load_dotenv
@@ -21,8 +21,8 @@ def get_db_connection(config_env) -> connection:
                          port = config_env["port"]
         )
 
-    except:
-        raise ConnectionError("Error: Cannot establish connection to database!")
+    except Exception as exc:
+        raise ConnectionError("Error: Cannot establish connection to database!") from exc
 
     return db_connection
 
@@ -62,8 +62,8 @@ def get_most_recent_brawler_data(db_connection: connection):
 
             most_recent_brawler_data = cur.fetchall()
 
-        except:
-            raise ConnectionError("Error: Unable to retrieve data!")
+        except Exception as exc:
+            raise ConnectionError("Error: Unable to retrieve data from database!") from exc
 
     return most_recent_brawler_data
 
@@ -73,9 +73,9 @@ def extract_brawler_data_database(config_env) -> list[dict]:
 
     db_connection = get_db_connection(config_env)
 
-    brawler_data_database = get_most_recent_brawler_data(db_connection)
+    most_recent_brawler_data_database = get_most_recent_brawler_data(db_connection)
 
-    return brawler_data_database
+    return most_recent_brawler_data_database
 
 ## API Extraction
 def get_api_header(api_token: str) -> dict:
@@ -93,19 +93,20 @@ def get_all_brawler_data(api_header: dict) -> list[dict]:
     """Returns all brawler data"""
 
     try:
-        response = requests.get("https://api.brawlstars.com/v1/brawlers", headers=api_header, timeout=5)
+        response = requests.get("https://api.brawlstars.com/v1/brawlers",
+                                headers=api_header, timeout=5)
         response_data = response.json()
         brawler_data_all = response_data["items"]
 
-    except:
-        raise ConnectionError("Error: Unable to return brawler data")
+    except Exception as exc:
+        raise ConnectionError("Error: Unable to return brawler data from API!") from exc
 
     return brawler_data_all
 
 
 def extract_brawler_data_api(config_env) -> list[dict]:
     """Extracts brawler data by get request to the brawl API"""
-    
+
     token = config_env["api_token"]
 
     api_header_data = get_api_header(token)
