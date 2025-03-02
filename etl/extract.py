@@ -68,6 +68,15 @@ def get_most_recent_brawler_data(db_connection: connection):
     return most_recent_brawler_data
 
 
+def extract_brawler_data_database(config_env) -> list[dict]:
+    """Extracts brawler data from database"""
+
+    db_connection = get_db_connection(config_env)
+
+    brawler_data_database = get_most_recent_brawler_data(db_connection)
+
+    return brawler_data_database
+
 ## API Extraction
 def get_api_header(api_token: str) -> dict:
     """Returns api header data"""
@@ -94,14 +103,10 @@ def get_all_brawler_data(api_header: dict) -> list[dict]:
     return brawler_data_all
 
 
-def extract_brawler_data_api() -> list[dict]:
+def extract_brawler_data_api(config_env) -> list[dict]:
     """Extracts brawler data by get request to the brawl API"""
     
-    load_dotenv()
-
-    config = environ
-
-    token = config["api_token"]
+    token = config_env["api_token"]
 
     api_header_data = get_api_header(token)
 
@@ -116,11 +121,6 @@ if __name__ =="__main__":
 
     config = environ
 
-    conn = get_db_connection(config)
+    brawler_data_database = extract_brawler_data_database(config)
 
-    brawler_data = get_most_recent_brawler_data(conn)
-    
-    for row in brawler_data:
-        print(row)
-
-    conn.close()
+    brawler_data_api = extract_brawler_data_api(config)
