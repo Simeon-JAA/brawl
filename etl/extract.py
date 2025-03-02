@@ -1,11 +1,15 @@
 """Extract file for  chages into database"""
 
+import requests
 from os import environ
 
 import psycopg2
 from psycopg2.extensions import connection
+from psycopg2.extras import DictCursor
 from dotenv import load_dotenv
 
+
+## Database Extraction
 def get_db_connection(config_env) -> connection:
     """Establishes connection with the database"""
 
@@ -26,12 +30,12 @@ def get_db_connection(config_env) -> connection:
 def get_most_recent_brawler_data(db_connection: connection):
     """Returns most recent brawler data in database"""
 
-    with db_connection.cursor() as cur:
+    with db_connection.cursor(cursor_factory=DictCursor) as cur:
         try:
 
-            cur.execute("""SELECT b.brawler_id, b.brawler_version, b.brawler_name,
-                        sp.starpower_id, sp.starpower_version, sp.starpower_name,
-                        g.gadget_id, g.gadget_version, g.gadget_name
+            cur.execute("""SELECT DISTINCT b.brawler_id, b.brawler_name,
+                        sp.starpower_id, sp.starpower_name,
+                        g.gadget_id, g.gadget_name
                         FROM brawler b
                         INNER JOIN (SELECT b_2.brawler_id, MAX(b_2.brawler_version) AS brawler_version
                                     FROM brawler b_2
@@ -64,6 +68,48 @@ def get_most_recent_brawler_data(db_connection: connection):
     return most_recent_brawler_data
 
 
+## API Extraction
+def get_api_header(api_token: str) -> dict:
+    """Returns api header data"""
+
+    header = {
+        "Accept": "application/json",
+        "Authorization": f"Bearer {api_token}"
+    }
+
+    return header
+
+
+def get_all_brawler_data(api_header: dict) -> list[dict]:
+    """Returns all brawler data"""
+
+    try:
+        response = requests.get("https://api.brawlstars.com/v1/brawlers", headers=api_header, timeout=5)
+        response_data = response.json()
+        brawler_data_all = response_data["items"]
+
+    except:
+        raise ConnectionError("Error: Unable to return brawler data")
+
+    return brawler_data_all
+
+
+def extract_brawler_data_api() -> list[dict]:
+    """Extracts brawler data by get request to the brawl API"""
+    
+    load_dotenv()
+
+    config = environ
+
+    token = config["api_token"]
+
+    api_header_data = get_api_header(token)
+
+    all_brawler_data = get_all_brawler_data(api_header_data)
+
+    return all_brawler_data
+
+
 if __name__ =="__main__":
 
     load_dotenv()
@@ -73,6 +119,8 @@ if __name__ =="__main__":
     conn = get_db_connection(config)
 
     brawler_data = get_most_recent_brawler_data(conn)
-    print(brawler_data)
+    
+    for row in brawler_data:
+        print(row)
 
     conn.close()
