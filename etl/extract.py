@@ -5,7 +5,7 @@ from os import environ
 import psycopg2
 import requests
 from psycopg2.extensions import connection
-from psycopg2.extras import DictCursor
+from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 
 
@@ -27,15 +27,14 @@ def get_db_connection(config_env) -> connection:
     return db_connection
 
 
-def get_most_recent_brawler_data(db_connection: connection):
-    """Returns most recent brawler data in database"""
+def get_most_recent_brawler_star_powers(db_connection: connection):
+    """Returns most recent brawler star powers in database"""
 
-    with db_connection.cursor(cursor_factory=DictCursor) as cur:
+    with db_connection.cursor(cursor_factory=RealDictCursor) as cur:
         try:
 
             cur.execute("""SELECT DISTINCT b.brawler_id, b.brawler_name,
-                        sp.starpower_id, sp.starpower_name,
-                        g.gadget_id, g.gadget_name
+                        sp.starpower_id, sp.starpower_name
                         FROM brawler b
                         INNER JOIN (SELECT b_2.brawler_id, MAX(b_2.brawler_version) AS brawler_version
                                     FROM brawler b_2
@@ -49,6 +48,31 @@ def get_most_recent_brawler_data(db_connection: connection):
                                     GROUP BY sp_2.starpower_id) sp_max
                         ON sp.starpower_id = sp_max.starpower_id
                         AND sp.starpower_version = sp_max.starpower_version
+                        GROUP BY b.brawler_id, b.brawler_version, b.brawler_name,
+                        sp.starpower_id, sp.starpower_version, sp.starpower_name;""")
+
+            most_recent_brawler_data = cur.fetchall()
+
+        except Exception as exc:
+            raise ConnectionError("Error: Unable to retrieve data from database!") from exc
+
+    return most_recent_brawler_data
+
+
+def get_most_recent_brawler_gadgets(db_connection: connection):
+    """Returns most recent brawler gadgets in database"""
+
+    with db_connection.cursor(cursor_factory=RealDictCursor) as cur:
+        try:
+
+            cur.execute("""SELECT DISTINCT b.brawler_id, b.brawler_name,
+                        g.gadget_id, g.gadget_name
+                        FROM brawler b
+                        INNER JOIN (SELECT b_2.brawler_id, MAX(b_2.brawler_version) AS brawler_version
+                                    FROM brawler b_2
+                                    GROUP BY b_2.brawler_id) b_max
+                        ON b.brawler_id = b_max.brawler_id 
+                        AND b.brawler_version = b_max.brawler_version
                         INNER JOIN gadget g ON b.brawler_id = g.brawler_id 
                         AND b.brawler_version = g.brawler_version
                         INNER JOIN (SELECT g_2.gadget_id, MAX(g_2.gadget_version) AS gadget_version
@@ -57,8 +81,30 @@ def get_most_recent_brawler_data(db_connection: connection):
                         ON g.gadget_id = g_max.gadget_id
                         AND g.gadget_version = g_max.gadget_version
                         GROUP BY b.brawler_id, b.brawler_version, b.brawler_name,
-                        sp.starpower_id, sp.starpower_version, sp.starpower_name,
                         g.gadget_id, g.gadget_version, g.gadget_name;""")
+
+            most_recent_brawler_data = cur.fetchall()
+
+        except Exception as exc:
+            raise ConnectionError("Error: Unable to retrieve data from database!") from exc
+
+    return most_recent_brawler_data
+
+
+def get_most_recent_brawler_data(db_connection: connection):
+    """Returns most recent brawler data in database"""
+
+    with db_connection.cursor(cursor_factory=RealDictCursor) as cur:
+        try:
+
+            cur.execute("""SELECT DISTINCT b.brawler_id, b.brawler_name
+                        FROM brawler b
+                        INNER JOIN (SELECT b_2.brawler_id, MAX(b_2.brawler_version) AS brawler_version
+                                    FROM brawler b_2
+                                    GROUP BY b_2.brawler_id) b_max
+                        ON b.brawler_id = b_max.brawler_id 
+                        AND b.brawler_version = b_max.brawler_version
+                        GROUP BY b.brawler_id, b.brawler_version, b.brawler_name;""")
 
             most_recent_brawler_data = cur.fetchall()
 
