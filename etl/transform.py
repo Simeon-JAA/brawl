@@ -4,7 +4,7 @@ import re
 
 def brawler_name_value_to_title(brawler_data: dict) -> dict:
     """Apply title() to all values for the 'name' key"""
-    
+
     brawler_data["name"] = brawler_data["name"].title()
 
     for star_power in brawler_data["starPowers"]:
@@ -45,4 +45,4 @@ def transform_brawl_data_api(brawl_data_api: list[dict]) -> list[dict]:
 
 if __name__ =="__main__":
 
-    transform_brawl_data_api()
+    pass
