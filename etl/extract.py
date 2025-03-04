@@ -4,6 +4,7 @@ from os import environ
 
 import psycopg2
 import requests
+import pandas as pd
 from psycopg2.extensions import connection
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
@@ -27,7 +28,7 @@ def get_db_connection(config_env) -> connection:
     return db_connection
 
 
-def get_most_recent_brawler_star_powers(db_connection: connection):
+def get_most_recent_brawler_star_powers(db_connection: connection) -> pd.DataFrame:
     """Returns most recent brawler star powers in database"""
 
     with db_connection.cursor(cursor_factory=RealDictCursor) as cur:
@@ -56,10 +57,12 @@ def get_most_recent_brawler_star_powers(db_connection: connection):
         except Exception as exc:
             raise ConnectionError("Error: Unable to retrieve data from database!") from exc
 
-    return most_recent_brawler_data
+    most_recent_brawler_data_df = pd.DataFrame(most_recent_brawler_data)
+
+    return most_recent_brawler_data_df
 
 
-def get_most_recent_brawler_gadgets(db_connection: connection):
+def get_most_recent_brawler_gadgets(db_connection: connection) -> pd.DataFrame:
     """Returns most recent brawler gadgets in database"""
 
     with db_connection.cursor(cursor_factory=RealDictCursor) as cur:
@@ -88,10 +91,12 @@ def get_most_recent_brawler_gadgets(db_connection: connection):
         except Exception as exc:
             raise ConnectionError("Error: Unable to retrieve data from database!") from exc
 
-    return most_recent_brawler_data
+    most_recent_brawler_data_df = pd.DataFrame(most_recent_brawler_data)
+
+    return most_recent_brawler_data_df
 
 
-def get_most_recent_brawler_data(db_connection: connection):
+def get_most_recent_brawler_data(db_connection: connection) -> pd.DataFrame:
     """Returns most recent brawler data in database"""
 
     with db_connection.cursor(cursor_factory=RealDictCursor) as cur:
@@ -111,7 +116,9 @@ def get_most_recent_brawler_data(db_connection: connection):
         except Exception as exc:
             raise ConnectionError("Error: Unable to retrieve data from database!") from exc
 
-    return most_recent_brawler_data
+    most_recent_brawler_data_df = pd.DataFrame(most_recent_brawler_data)
+    
+    return most_recent_brawler_data_df
 
 
 def extract_brawler_data_database(config_env) -> list[dict]:
