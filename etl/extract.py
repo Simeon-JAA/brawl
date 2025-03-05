@@ -98,20 +98,38 @@ def get_most_recent_brawler_version(db_connection: connection, brawler_id: int) 
     """Returns most recent brawler version"""
 
     if not isinstance(brawler_id, int):
-        raise TypeError("Error: Brawler id is not an integer!")
+        raise TypeError("Error: Brawler is is not an integer!")
 
     try:
         with db_connection.cursor() as cur:
             cur.execute("""SELECT MAX(brawler_version)
                         FROM brawler
                         WHERE brawler_id = %s;""",[brawler_id])
-
             max_brawler_version = cur.fetchall()
 
     except Exception as exc:
         raise psycopg2.DatabaseError("Error: Unavle to retrieve data from database!") from exc
 
     return max_brawler_version
+
+
+def get_most_recent_star_power_version(db_connection: connection, star_power_id: int) -> int:
+    """Returns most recent star power version"""
+
+    if not isinstance(star_power_id, int):
+        raise TypeError("Error: Star power is is not an integer!")
+
+    try:
+        with db_connection.cursor() as cur:
+            cur.execute("""SELECT MAX(starpower_version)
+                        FROM starpower
+                        WHERE starpower_id = %s;""",[star_power_id])
+            max_star_power_version = cur.fetchall()
+
+    except Exception as exc:
+        raise psycopg2.DatabaseError("Error: Unavle to retrieve data from database!") from exc
+
+    return max_star_power_version
 
 
 def get_most_recent_brawler_data(db_connection: connection) -> pd.DataFrame:
