@@ -7,6 +7,7 @@ from psycopg2.extensions import connection
 from dotenv import load_dotenv
 
 from extract import get_most_recent_brawler_version, get_most_recent_star_power_version
+from extract import get_most_recent_gadget_version
 
 def get_db_connection(config_env) -> connection:
     """Establishes connection with the database"""
@@ -47,16 +48,16 @@ def insert_new_brawler_data(db_conn: connection, brawler_data: dict):
             raise psycopg2.DatabaseError("Error: Unable to insert brawler data!") from exc
 
 
-def insert_new_star_power_data(db_conn: connection, star_power_data: dict):
+def insert_new_starpower_data(db_conn: connection, starpower_data: dict):
     """Inserts new starpower data into the database"""
 
-    if not isinstance(star_power_data, dict):
+    if not isinstance(starpower_data, dict):
         raise TypeError("Error: Starpower data is not a dictionary!")
-    if not star_power_data:
+    if not starpower_data:
         raise ValueError("Error: Starpower data cannot be empty!")
     
     try:
-        starpower_version = get_most_recent_star_power_version(db_conn, star_power_data["id"])
+        starpower_version = get_most_recent_star_power_version(db_conn, starpower_data["id"])
     except Exception as exc:
         raise psycopg2.DatabaseError("Error: Unable to retrieve starpower version!") from exc
 
@@ -68,8 +69,31 @@ def insert_new_star_power_data(db_conn: connection, star_power_data: dict):
                         #TODO finish input arguments
                         [starpower_version])
         except Exception as exc:
-            raise psycopg2.DatabaseError("Error: Unable to insert brawler data!") from exc
+            raise psycopg2.DatabaseError("Error: Unable to insert starpower data!") from exc
 
+
+def insert_new_gadget_data(db_conn: connection, gadget_data: dict):
+    """Inserts new gadget data into the database"""
+
+    if not isinstance(gadget_data, dict):
+        raise TypeError("Error: Gadget data is not a dictionary!")
+    if not gadget_data:
+        raise ValueError("Error: Gadget data cannot be empty!")
+    
+    try:
+        gadget_version = get_most_recent_gadget_version(db_conn, gadget_data["id"])
+    except Exception as exc:
+        raise psycopg2.DatabaseError("Error: Unable to retrieve gadget version!") from exc
+
+    with db_conn.cursor() as cur:
+        try:
+            cur.execute("""INSERT INTO gadget 
+                        (gadget_id, gadget_version, gadget_name, brawler_id, brawler_version)
+                        VALUES (%s, %s, %s, %s, %s);""", 
+                        #TODO finish input arguments
+                        [gadget_version])
+        except Exception as exc:
+            raise psycopg2.DatabaseError("Error: Unable to insert gadget data!") from exc
 
 
 if __name__ =="__main__":
