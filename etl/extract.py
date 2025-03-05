@@ -132,6 +132,25 @@ def get_most_recent_star_power_version(db_connection: connection, star_power_id:
     return max_star_power_version
 
 
+def get_most_recent_gadget_version(db_connection: connection, gadget_id: int) -> int:
+    """Returns most recent gadget version"""
+
+    if not isinstance(gadget_id, int):
+        raise TypeError("Error: Gadget id is not an integer!")
+
+    try:
+        with db_connection.cursor() as cur:
+            cur.execute("""SELECT MAX(gadget_version)
+                        FROM gadget
+                        WHERE gadget_id = %s;""", [gadget_id])
+            max_gadget_version = cur.fetchall()
+
+    except Exception as exc:
+        raise psycopg2.DatabaseError("Error: Unavle to retrieve data from database!") from exc
+
+    return max_gadget_version
+
+
 def get_most_recent_brawler_data(db_connection: connection) -> pd.DataFrame:
     """Returns most recent brawler data in database"""
 
