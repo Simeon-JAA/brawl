@@ -66,7 +66,6 @@ def get_most_recent_brawler_gadgets(db_connection: connection) -> pd.DataFrame:
 
     with db_connection.cursor(cursor_factory=RealDictCursor) as cur:
         try:
-
             cur.execute("""SELECT DISTINCT b.brawler_id, b.brawler_name,
                         g.gadget_id, g.gadget_name
                         FROM brawler b
@@ -120,7 +119,6 @@ def get_most_recent_brawler_data(db_connection: connection) -> pd.DataFrame:
 
     with db_connection.cursor(cursor_factory=RealDictCursor) as cur:
         try:
-
             cur.execute("""SELECT DISTINCT b.brawler_id, b.brawler_name
                         FROM brawler b
                         INNER JOIN (SELECT b_2.brawler_id, MAX(b_2.brawler_version) AS brawler_version
@@ -148,6 +146,7 @@ def extract_brawler_data_database(config_env) -> list[dict]:
     most_recent_brawler_data_database = get_most_recent_brawler_data(db_connection)
 
     return most_recent_brawler_data_database
+
 
 ## API Extraction
 def get_api_header(api_token: str) -> dict:
@@ -180,9 +179,7 @@ def extract_brawler_data_api(config_env) -> list[dict]:
     """Extracts brawler data by get request to the brawl API"""
 
     token = config_env["api_token"]
-
     api_header_data = get_api_header(token)
-
     all_brawler_data = get_all_brawler_data(api_header_data)
 
     return all_brawler_data
