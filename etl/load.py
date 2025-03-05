@@ -6,6 +6,8 @@ import psycopg2
 from psycopg2.extensions import connection
 from dotenv import load_dotenv
 
+from extract import get_most_recent_brawler_version
+
 def get_db_connection(config_env) -> connection:
     """Establishes connection with the database"""
 
@@ -23,22 +25,26 @@ def get_db_connection(config_env) -> connection:
     return db_conn
 
 
-def insert_new_brarler_data(db_conn: connection, brawler_data: dict):
+def insert_new_brawler_data(db_conn: connection, brawler_data: dict):
     """Inserts new brawler data into the database"""
 
     if not isinstance(brawler_data, dict):
         raise TypeError("Error: Brawler data is not a dictionary!")
-
     if not brawler_data:
         raise ValueError("Error: Brawler data cannot be empty!")
+    
+    try:
+        brawler_version = get_most_recent_brawler_version(db_conn, brawler_data["id"])
+    except Exception as exc:
+        raise psycopg2.DatabaseError("Error: Unable to retrieve brawler version!") from exc
 
     with db_conn.cursor() as cur:
         try:
-
-            cur.execute("""""")
-
+            cur.execute("""INSERT INTO brawler 
+                        (brawler_id, brawler_version, brawler_name)
+                        VALUES (%s, %s, %s);""", [brawler_data["id"], brawler_version, brawler_data["name"]])
         except Exception as exc:
-            raise ConnectionError("Error: Unable to insert data!") from exc
+            raise psycopg2.DatabaseError("Error: Unable to insert brawler data!") from exc
 
 
 
@@ -49,7 +55,5 @@ if __name__ =="__main__":
     config = environ
 
     conn = get_db_connection(config)
-
-    insert_new_brarler_data(conn, "temp")
 
     conn.close()
