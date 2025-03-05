@@ -33,7 +33,6 @@ def get_most_recent_brawler_star_powers(db_connection: connection) -> pd.DataFra
 
     with db_connection.cursor(cursor_factory=RealDictCursor) as cur:
         try:
-
             cur.execute("""SELECT DISTINCT b.brawler_id, b.brawler_name,
                         sp.starpower_id, sp.starpower_name
                         FROM brawler b
@@ -103,18 +102,17 @@ def get_most_recent_brawler_version(db_connection: connection, brawler_id: int) 
         raise TypeError("Error: Brawler id is not an integer!")
 
     try:
-        
         with db_connection.cursor() as cur:
-
             cur.execute("""SELECT MAX(brawler_version)
                         FROM brawler
                         WHERE brawler_id = %s;""",[brawler_id])
+            
+            max_brawler_version = cur.fetchall()
     
     except Exception as exc:
         raise psycopg2.DatabaseError("Error: Unavle to retrieve data from database!")
         
-    return
-
+    return max_brawler_version
 
 
 def get_most_recent_brawler_data(db_connection: connection) -> pd.DataFrame:
