@@ -23,7 +23,7 @@ def get_db_connection(config_env) -> connection:
         )
 
     except Exception as exc:
-        raise ConnectionError("Error: Cannot establish connection to database!") from exc
+        raise psycopg2.DatabaseError("Error: Cannot establish connection to database!") from exc
 
     return db_connection
 
@@ -55,7 +55,7 @@ def get_most_recent_brawler_star_powers(db_connection: connection) -> pd.DataFra
             most_recent_brawler_data = cur.fetchall()
 
         except Exception as exc:
-            raise ConnectionError("Error: Unable to retrieve data from database!") from exc
+            raise psycopg2.DatabaseError("Error: Unable to retrieve data from database!") from exc
 
     most_recent_brawler_data_df = pd.DataFrame(most_recent_brawler_data)
 
@@ -89,11 +89,32 @@ def get_most_recent_brawler_gadgets(db_connection: connection) -> pd.DataFrame:
             most_recent_brawler_data = cur.fetchall()
 
         except Exception as exc:
-            raise ConnectionError("Error: Unable to retrieve data from database!") from exc
+            raise psycopg2.DatabaseError("Error: Unable to retrieve data from database!") from exc
 
     most_recent_brawler_data_df = pd.DataFrame(most_recent_brawler_data)
 
     return most_recent_brawler_data_df
+
+
+def get_most_recent_brawler_version(db_connection: connection, brawler_id: int) -> int:
+    """Returns most recent brawler version"""
+
+    if not isinstance(brawler_id, int):
+        raise TypeError("Error: Brawler id is not an integer!")
+
+    try:
+        
+        with db_connection.cursor() as cur:
+
+            cur.execute("""SELECT MAX(brawler_version)
+                        FROM brawler
+                        WHERE brawler_id = %s;""",[brawler_id])
+    
+    except Exception as exc:
+        raise psycopg2.DatabaseError("Error: Unavle to retrieve data from database!")
+        
+    return
+
 
 
 def get_most_recent_brawler_data(db_connection: connection) -> pd.DataFrame:
@@ -114,7 +135,7 @@ def get_most_recent_brawler_data(db_connection: connection) -> pd.DataFrame:
             most_recent_brawler_data = cur.fetchall()
 
         except Exception as exc:
-            raise ConnectionError("Error: Unable to retrieve data from database!") from exc
+            raise psycopg2.DatabaseError("Error: Unable to retrieve data from database!") from exc
 
     most_recent_brawler_data_df = pd.DataFrame(most_recent_brawler_data)
     
@@ -152,7 +173,7 @@ def get_all_brawler_data(api_header: dict) -> list[dict]:
         brawler_data_all = response_data["items"]
 
     except Exception as exc:
-        raise ConnectionError("Error: Unable to return brawler data from API!") from exc
+        raise psycopg2.DatabaseError("Error: Unable to return brawler data from API!") from exc
 
     return brawler_data_all
 
