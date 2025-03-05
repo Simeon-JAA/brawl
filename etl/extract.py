@@ -105,12 +105,12 @@ def get_most_recent_brawler_version(db_connection: connection, brawler_id: int) 
             cur.execute("""SELECT MAX(brawler_version)
                         FROM brawler
                         WHERE brawler_id = %s;""",[brawler_id])
-            
+
             max_brawler_version = cur.fetchall()
-    
+
     except Exception as exc:
-        raise psycopg2.DatabaseError("Error: Unavle to retrieve data from database!")
-        
+        raise psycopg2.DatabaseError("Error: Unavle to retrieve data from database!") from exc
+
     return max_brawler_version
 
 
@@ -134,7 +134,7 @@ def get_most_recent_brawler_data(db_connection: connection) -> pd.DataFrame:
             raise psycopg2.DatabaseError("Error: Unable to retrieve data from database!") from exc
 
     most_recent_brawler_data_df = pd.DataFrame(most_recent_brawler_data)
-    
+
     return most_recent_brawler_data_df
 
 
