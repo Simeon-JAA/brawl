@@ -28,21 +28,20 @@ def get_db_connection(config_env) -> connection:
     return db_connection
 
 
-def get_most_recent_brawler_star_powers(db_connection: connection) -> pd.DataFrame:
-    """Returns most recent brawler star powers in database"""
+def get_most_recent_brawler_starpowers(db_connection: connection) -> pd.DataFrame:
+    """Returns most recent brawler starpowers in database"""
 
     with db_connection.cursor(cursor_factory=RealDictCursor) as cur:
         try:
             cur.execute("""SELECT DISTINCT b.brawler_id, b.brawler_name,
-                        sp.starpower_id, sp.starpower_name
+                        sp.starpower_id, sp.starpower_version, sp.starpower_name
                         FROM brawler b
                         INNER JOIN (SELECT b_2.brawler_id, MAX(b_2.brawler_version) AS brawler_version
                                     FROM brawler b_2
                                     GROUP BY b_2.brawler_id) b_max
                         ON b.brawler_id = b_max.brawler_id 
                         AND b.brawler_version = b_max.brawler_version
-                        INNER JOIN starpower sp ON b.brawler_id = sp.brawler_id 
-                        AND b.brawler_version = sp.brawler_version
+                        INNER JOIN starpower sp ON b.brawler_id = sp.brawler_id
                         INNER JOIN (SELECT sp_2.starpower_id, MAX(sp_2.starpower_version) AS starpower_version
                                     FROM starpower sp_2
                                     GROUP BY sp_2.starpower_id) sp_max
@@ -55,6 +54,9 @@ def get_most_recent_brawler_star_powers(db_connection: connection) -> pd.DataFra
 
         except Exception as exc:
             raise psycopg2.DatabaseError("Error: Unable to retrieve data from database!") from exc
+        
+        if not most_recent_brawler_data:
+            raise LookupError("Error: Database unable to lookup dataa!")
 
     most_recent_brawler_data_df = pd.DataFrame(most_recent_brawler_data)
 
@@ -67,7 +69,7 @@ def get_most_recent_brawler_gadgets(db_connection: connection) -> pd.DataFrame:
     with db_connection.cursor(cursor_factory=RealDictCursor) as cur:
         try:
             cur.execute("""SELECT DISTINCT b.brawler_id, b.brawler_name,
-                        g.gadget_id, g.gadget_name
+                        g.gadget_id, g.gadget_version, g.gadget_name
                         FROM brawler b
                         INNER JOIN (SELECT b_2.brawler_id, MAX(b_2.brawler_version) AS brawler_version
                                     FROM brawler b_2
@@ -75,7 +77,6 @@ def get_most_recent_brawler_gadgets(db_connection: connection) -> pd.DataFrame:
                         ON b.brawler_id = b_max.brawler_id 
                         AND b.brawler_version = b_max.brawler_version
                         INNER JOIN gadget g ON b.brawler_id = g.brawler_id 
-                        AND b.brawler_version = g.brawler_version
                         INNER JOIN (SELECT g_2.gadget_id, MAX(g_2.gadget_version) AS gadget_version
                                     FROM gadget g_2
                                     GROUP BY g_2.gadget_id) g_max
@@ -94,6 +95,7 @@ def get_most_recent_brawler_gadgets(db_connection: connection) -> pd.DataFrame:
     return most_recent_brawler_data_df
 
 
+##TODO Get rid of function?
 def get_most_recent_brawler_version(db_connection: connection, brawler_id: int) -> int:
     """Returns most recent brawler version"""
 
@@ -113,6 +115,7 @@ def get_most_recent_brawler_version(db_connection: connection, brawler_id: int) 
     return max_brawler_version
 
 
+##TODO Get rid of function?
 def get_most_recent_star_power_version(db_connection: connection, star_power_id: int) -> int:
     """Returns most recent star power version"""
 
@@ -132,6 +135,7 @@ def get_most_recent_star_power_version(db_connection: connection, star_power_id:
     return max_star_power_version
 
 
+##TODO Get rid of function?
 def get_most_recent_gadget_version(db_connection: connection, gadget_id: int) -> int:
     """Returns most recent gadget version"""
 
