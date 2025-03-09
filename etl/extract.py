@@ -115,24 +115,23 @@ def get_most_recent_brawler_version(db_connection: connection, brawler_id: int) 
     return max_brawler_version
 
 
-##TODO Get rid of function?
-def get_most_recent_star_power_version(db_connection: connection, star_power_id: int) -> int:
+def get_most_recent_starpower_version(db_connection: connection, starpower_id: int) -> int:
     """Returns most recent star power version"""
 
-    if not isinstance(star_power_id, int):
+    if not isinstance(starpower_id, int):
         raise TypeError("Error: Star power is is not an integer!")
 
     try:
         with db_connection.cursor() as cur:
             cur.execute("""SELECT MAX(starpower_version)
                         FROM starpower
-                        WHERE starpower_id = %s;""",[star_power_id])
-            max_star_power_version = cur.fetchall()
+                        WHERE starpower_id = %s;""",[starpower_id])
+            max_starpower_version = cur.fetchall()
 
     except Exception as exc:
         raise psycopg2.DatabaseError("Error: Unavle to retrieve data from database!") from exc
 
-    return max_star_power_version
+    return max_starpower_version
 
 
 ##TODO Get rid of function?
