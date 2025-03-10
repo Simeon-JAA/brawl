@@ -95,7 +95,6 @@ def get_most_recent_brawler_gadgets(db_connection: connection) -> pd.DataFrame:
     return most_recent_brawler_data_df
 
 
-##TODO Get rid of function?
 def get_most_recent_brawler_version(db_connection: connection, brawler_id: int) -> int:
     """Returns most recent brawler version"""
 
@@ -107,11 +106,13 @@ def get_most_recent_brawler_version(db_connection: connection, brawler_id: int) 
             cur.execute("""SELECT MAX(brawler_version)
                         FROM brawler
                         WHERE brawler_id = %s;""",[brawler_id])
-            max_brawler_version = cur.fetchall()
+            max_brawler_version = cur.fetchone()[0]
 
     except Exception as exc:
         raise psycopg2.DatabaseError("Error: Unavle to retrieve data from database!") from exc
 
+    if not max_brawler_version:
+        return 0
     return max_brawler_version
 
 
@@ -126,15 +127,16 @@ def get_most_recent_starpower_version(db_connection: connection, starpower_id: i
             cur.execute("""SELECT MAX(starpower_version)
                         FROM starpower
                         WHERE starpower_id = %s;""",[starpower_id])
-            max_starpower_version = cur.fetchall()
+            max_starpower_version = cur.fetchone()[0]
 
     except Exception as exc:
         raise psycopg2.DatabaseError("Error: Unavle to retrieve data from database!") from exc
 
+    if not max_starpower_version:
+        return 0
     return max_starpower_version
 
 
-##TODO Get rid of function?
 def get_most_recent_gadget_version(db_connection: connection, gadget_id: int) -> int:
     """Returns most recent gadget version"""
 
@@ -146,11 +148,13 @@ def get_most_recent_gadget_version(db_connection: connection, gadget_id: int) ->
             cur.execute("""SELECT MAX(gadget_version)
                         FROM gadget
                         WHERE gadget_id = %s;""", [gadget_id])
-            max_gadget_version = cur.fetchall()
+            max_gadget_version = cur.fetchone()
 
     except Exception as exc:
         raise psycopg2.DatabaseError("Error: Unavle to retrieve data from database!") from exc
 
+    if not max_gadget_version:
+        return 0
     return max_gadget_version
 
 
