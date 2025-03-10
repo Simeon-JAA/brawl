@@ -41,8 +41,9 @@ if __name__ =="__main__":
     brawler_changes_df = generate_brawler_changes(brawler_data_database_df, brawler_data_api_df)
     brawler_changes_df = add_brawler_changes_version(conn, brawler_changes_df)
 
-    # Insert brawler (required as brawler_version is pulled into
-    # other dataframes, this should be updated first)
+    # Insert brawler updates/new data
+    # This is required as brawler_version is pulled into
+    # other dataframes, so this should be updated first so the most recent version is pulled)
     insert_new_brawler_data(conn, brawler_changes_df)
 
     starpower_changes_df = generate_starpower_changes(brawler_starpower_data_database_df,
