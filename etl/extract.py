@@ -148,7 +148,7 @@ def get_most_recent_gadget_version(db_connection: connection, gadget_id: int) ->
             cur.execute("""SELECT MAX(gadget_version)
                         FROM gadget
                         WHERE gadget_id = %s;""", [gadget_id])
-            max_gadget_version = cur.fetchone()
+            max_gadget_version = cur.fetchone()[0]
 
     except Exception as exc:
         raise psycopg2.DatabaseError("Error: Unavle to retrieve data from database!") from exc
