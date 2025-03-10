@@ -121,11 +121,19 @@ def changes_to_star_power(star_power_data_database: DataFrame,
     return
 
 
+def add_brawler_changes_version(db_connection: connection, brawler_changes_df: DataFrame) -> DataFrame:
+    """Creates new column in dataframe with most recent brawler version"""
+
+    brawler_changes_df["brawler_version"] = brawler_changes_df["brawler_id"].apply(lambda brawler_id: get_most_recent_brawler_version(db_connection, brawler_id))
+
+    return brawler_changes_df
+
+
 def add_starpower_changes_version(db_connection: connection, starpower_changes_df: DataFrame) -> DataFrame:
     """Creates new column in dataframe with most recent starpower version"""
 
     starpower_changes_df["starpower_version"] = starpower_changes_df["starpower_id"].apply(lambda sp_id: get_most_recent_starpower_version(db_connection, sp_id))
-
+    starpower_changes_df = add_brawler_changes_version(db_connection, starpower_changes_df)
     return starpower_changes_df
 
 
@@ -133,16 +141,8 @@ def add_gadget_changes_version(db_connection: connection, gadget_changes_df: Dat
     """Creates new column in dataframe with most recent gadget version"""
 
     gadget_changes_df["gadget_version"] = gadget_changes_df["gadget_id"].apply(lambda gadget_id: get_most_recent_gadget_version(db_connection, gadget_id))
-
+    gadget_changes_df = add_brawler_changes_version(db_connection, gadget_changes_df)
     return gadget_changes_df
-
-
-def add_brawler_changes_version(db_connection: connection, brawler_changes_df: DataFrame) -> DataFrame:
-    """Creates new column in dataframe with most recent brawler version"""
-
-    brawler_changes_df["brawler_version"] = brawler_changes_df["brawler_id"].apply(lambda brawler_id: get_most_recent_brawler_version(db_connection, brawler_id))
-
-    return brawler_changes_df
 
 
 def generate_starpower_changes(starpower_db_df: DataFrame, starpower_api_df: DataFrame) -> DataFrame:
