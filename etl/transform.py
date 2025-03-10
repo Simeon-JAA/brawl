@@ -1,8 +1,12 @@
 """Transform script to clean data received by brawl API"""
 
 import re
+
 import pandas as pd
-from pandas import DataFrame
+from pandas import DataFrame, concat
+from psycopg2.extensions import connection
+
+from extract import get_most_recent_starpower_version
 
 def brawler_name_value_to_title(brawler_data: dict) -> dict:
     """Apply title() to all values for the 'name' key"""
@@ -77,8 +81,12 @@ def brawl_api_data_to_df(brawl_data_api, explode_column: str) -> DataFrame:
     brawl_data_api_df_exploded[get_new_exploded_column_names(explode_column)] = brawl_data_api_df_exploded[explode_column].apply(lambda x: pd.Series(x))
     brawl_data_api_df_exploded = brawl_data_api_df_exploded.drop(columns = explode_column)
     brawl_data_api_df_exploded = brawl_data_api_df_exploded.reset_index(drop=True)
+    brawl_data_api_df_rename_columns = brawl_data_api_df_exploded.rename(columns={"id": "brawler_id",
+                                                                                  "name": "brawler_name",
+                                                                                  "star_power_id": "starpower_id",
+                                                                                  "star_power_name": "starpower_name"})
 
-    return brawl_data_api_df_exploded
+    return brawl_data_api_df_rename_columns
 
 
 def filter_star_powers(brawler_data: dict) -> dict:
@@ -106,18 +114,45 @@ def changes_to_star_power(star_power_data_database: DataFrame,
     return
 
 
-def get_starpower_changes(star_power_data_database: DataFrame, brawl_data_api: dict) -> dict:
+def add_starpower_changes_version (db_connection: connection, starpower_changes_df: DataFrame) -> DataFrame:
+    """Creates new column in datafram with most recent starpower version"""
+
+    starpower_changes_df["starpower_version"] = starpower_changes_df["starpower_id"].apply(lambda sp_id: get_most_recent_starpower_version(db_connection, sp_id))
+
+    return starpower_changes_df
+
+
+def generate_starpower_changes(star_power_db_df: DataFrame, star_power_api_df: DataFrame) -> DataFrame:
     """Compares data between database and api and returns the difference to be inserted"""
 
-    for brawler in brawl_data_api:
+    starpower_data_to_load = DataFrame(columns={"brawler_id": [],
+                                                "brawler_name": [],
+                                                "starpower_id": [],
+                                                "starpower_name": []})
 
-        brawler_star_power_df = star_power_data_database[
-            star_power_data_database["brawler_id"] == brawler["id"]]
+    for brawler_id in star_power_api_df["brawler_id"].unique():
 
-        if brawler["name"] == "Bull":
-            star_power_data_api = filter_star_powers(brawler)
-            changes_to_star_power(brawler_star_power_df, star_power_data_api)
-    return
+        db_starpower_data = star_power_db_df[["brawler_id", "brawler_name",
+                                              "starpower_id", "starpower_name"]].loc[(star_power_db_df["brawler_id"] == brawler_id)]
+        db_starpower_data = db_starpower_data.reset_index(drop=True).sort_index(axis=1)
+
+        api_starpower_data = star_power_api_df.loc[(star_power_api_df["brawler_id"] == brawler_id)]
+        api_starpower_data = api_starpower_data.reset_index(drop=True).sort_index(axis=1)
+
+        if db_starpower_data.empty:
+            starpower_data_to_load = concat([starpower_data_to_load, api_starpower_data], ignore_index=True)
+        
+        else:
+            comparison_df = db_starpower_data.compare(other=api_starpower_data,
+                                            keep_shape=True, keep_equal=True,
+                                            result_names=("databse", "api"))
+            
+            differences_df = comparison_df.loc[(comparison_df.xs("databse",axis=1, level=1) != comparison_df.xs("api", axis=1, level=1)).any(axis=1)]
+            differences_filtered_df = differences_df.xs("api", axis=1, level=1)
+            
+            starpower_data_to_load = concat([starpower_data_to_load, differences_filtered_df], ignore_index=True)
+
+    return starpower_data_to_load
 
 
 if __name__ =="__main__":
