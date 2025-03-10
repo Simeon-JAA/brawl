@@ -81,17 +81,18 @@ def brawl_api_data_to_df(brawl_data_api, explode_column: str = '') -> DataFrame:
         brawl_data_api_df_rename = brawl_data_api_df.rename(columns={'id': 'brawler_id',
                                                                      'name': 'brawler_name'})
         return brawl_data_api_df_rename
-  
+
     brawl_data_api_df = pd.DataFrame(data = brawl_data_api,
                                      columns = ["id", "name", explode_column])
     brawl_data_api_df_exploded = brawl_data_api_df.explode(column=explode_column)
-    brawl_data_api_df_exploded[get_new_exploded_column_names(explode_column)] = brawl_data_api_df_exploded[explode_column].apply(lambda x: pd.Series(x))
+    brawl_data_api_df_exploded[get_new_exploded_column_names(explode_column)] = brawl_data_api_df_exploded[explode_column].apply(pd.Series)
     brawl_data_api_df_exploded = brawl_data_api_df_exploded.drop(columns = explode_column)
     brawl_data_api_df_exploded = brawl_data_api_df_exploded.reset_index(drop=True)
-    brawl_data_api_df_rename_columns = brawl_data_api_df_exploded.rename(columns={"id": "brawler_id",
-                                                                                  "name": "brawler_name",
-                                                                                  "star_power_id": "starpower_id",
-                                                                                  "star_power_name": "starpower_name"})
+    brawl_data_api_df_rename_columns = brawl_data_api_df_exploded.rename(columns={
+        "id": "brawler_id",
+        "name": "brawler_name",
+        "star_power_id": "starpower_id",
+        "star_power_name": "starpower_name"})
 
     return brawl_data_api_df_rename_columns
 
@@ -102,23 +103,6 @@ def filter_star_powers(brawler_data: dict) -> dict:
     keys = ("id", "name", "star_powers")
 
     return {k: v for k, v in brawler_data.items() if k in keys}
-
-
-def changes_to_star_power(star_power_data_database: DataFrame,
-                          star_power_data_api: dict) -> bool:
-    """Returns true if changes to a brawlers star power is detected"""
-
-    for star_power in star_power_data_api["star_powers"]:
-
-        star_power_id = star_power["id"]
-        # print(star_power_id)
-        # comparison_data = [k for k in star_power_data_database
-                          #  if star_power_id in star_power_data_database]
-
-        # print(comparison_data)
-
-    print(pd.DataFrame(star_power_data_database))
-    return
 
 
 def add_brawler_changes_version(db_connection: connection, brawler_changes_df: DataFrame) -> DataFrame:
@@ -164,15 +148,15 @@ def generate_starpower_changes(starpower_db_df: DataFrame, starpower_api_df: Dat
 
         if db_starpower_data.empty:
             starpower_data_to_load = concat([starpower_data_to_load, api_starpower_data], ignore_index=True)
-        
+
         else:
             comparison_df = db_starpower_data.compare(other=api_starpower_data,
                                             keep_shape=True, keep_equal=True,
                                             result_names=("databse", "api"))
-            
+
             differences_df = comparison_df.loc[(comparison_df.xs("databse",axis=1, level=1) != comparison_df.xs("api", axis=1, level=1)).any(axis=1)]
             differences_filtered_df = differences_df.xs("api", axis=1, level=1)
-            
+
             starpower_data_to_load = concat([starpower_data_to_load, differences_filtered_df], ignore_index=True)
 
     return starpower_data_to_load
@@ -197,15 +181,15 @@ def generate_gadget_changes(gadget_db_df: DataFrame, gadget_api_df: DataFrame) -
 
         if db_gadget_data.empty:
             gadget_data_to_load = concat([gadget_data_to_load, api_gadget_data], ignore_index=True)
-        
+
         else:
             comparison_df = db_gadget_data.compare(other=api_gadget_data,
                                             keep_shape=True, keep_equal=True,
                                             result_names=("databse", "api"))
-            
+
             differences_df = comparison_df.loc[(comparison_df.xs("databse",axis=1, level=1) != comparison_df.xs("api", axis=1, level=1)).any(axis=1)]
             differences_filtered_df = differences_df.xs("api", axis=1, level=1)
-            
+
             gadget_data_to_load = concat([gadget_data_to_load, differences_filtered_df], ignore_index=True)
 
     return gadget_data_to_load
@@ -219,7 +203,7 @@ def generate_brawler_changes(brawler_db_df: DataFrame, brawler_api_df: DataFrame
 
     for brawler_id in brawler_api_df["brawler_id"].unique():
 
-        db_brawler_data = brawler_db_df[["brawler_id", 
+        db_brawler_data = brawler_db_df[["brawler_id",
                                          "brawler_name"]].loc[(brawler_db_df["brawler_id"] == brawler_id)]
         db_brawler_data = db_brawler_data.reset_index(drop=True).sort_index(axis=1)
 
@@ -228,15 +212,15 @@ def generate_brawler_changes(brawler_db_df: DataFrame, brawler_api_df: DataFrame
 
         if db_brawler_data.empty:
             brawler_data_to_load = concat([brawler_data_to_load, api_brawler_data], ignore_index=True)
-        
+
         else:
             comparison_df = db_brawler_data.compare(other=api_brawler_data,
                                             keep_shape=True, keep_equal=True,
                                             result_names=("databse", "api"))
-            
+
             differences_df = comparison_df.loc[(comparison_df.xs("databse",axis=1, level=1) != comparison_df.xs("api", axis=1, level=1)).any(axis=1)]
             differences_filtered_df = differences_df.xs("api", axis=1, level=1)
-            
+
             brawler_data_to_load = concat([brawler_data_to_load, differences_filtered_df], ignore_index=True)
 
     return brawler_data_to_load

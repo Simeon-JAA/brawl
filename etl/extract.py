@@ -54,7 +54,7 @@ def get_most_recent_brawler_starpowers(db_connection: connection) -> pd.DataFram
 
         except Exception as exc:
             raise psycopg2.DatabaseError("Error: Unable to retrieve data from database!") from exc
-        
+
         if not most_recent_brawler_data:
             raise LookupError("Error: Database unable to lookup dataa!")
 

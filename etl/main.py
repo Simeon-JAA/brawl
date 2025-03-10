@@ -4,12 +4,14 @@ from os import environ
 
 from dotenv import load_dotenv
 
-from extract import extract_brawler_data_api, get_most_recent_brawler_data, get_db_connection
-from extract import get_most_recent_brawler_gadgets, get_most_recent_brawler_starpowers
-from transform import transform_brawl_data_api, generate_starpower_changes, brawl_api_data_to_df
-from transform import add_starpower_changes_version, generate_gadget_changes, add_gadget_changes_version
-from transform import generate_brawler_changes, add_brawler_changes_version
-from load import insert_new_brawler_data, insert_new_starpower_data, insert_new_gadget_data
+from extract import (extract_brawler_data_api, get_most_recent_brawler_data,
+                     get_most_recent_brawler_gadgets, get_most_recent_brawler_starpowers,
+                     get_db_connection)
+from transform import (transform_brawl_data_api, generate_starpower_changes,
+                       brawl_api_data_to_df, add_starpower_changes_version,
+                       generate_gadget_changes, add_gadget_changes_version,
+                       generate_brawler_changes, add_brawler_changes_version)
+from load import (insert_new_brawler_data, insert_new_starpower_data, insert_new_gadget_data)
 
 
 if __name__ =="__main__":
@@ -29,17 +31,18 @@ if __name__ =="__main__":
 
     ## Transform
     brawler_data_api = transform_brawl_data_api(brawler_data_api)
-    
-    # To Dataframes 
+
+    # To Dataframes
     brawler_data_api_df = brawl_api_data_to_df(brawler_data_api)
     brawler_starpower_data_api_df = brawl_api_data_to_df(brawler_data_api, "star_powers")
-    brawler_gadget_data_api_df = brawl_api_data_to_df(brawler_data_api, "gadgets")    
+    brawler_gadget_data_api_df = brawl_api_data_to_df(brawler_data_api, "gadgets")
 
     # Changes/Missing data
     brawler_changes_df = generate_brawler_changes(brawler_data_database_df, brawler_data_api_df)
     brawler_changes_df = add_brawler_changes_version(conn, brawler_changes_df)
-    
-    # Insert brawler (required as brawler_version is pulled into other dataframes, this should be updated first)
+
+    # Insert brawler (required as brawler_version is pulled into
+    # other dataframes, this should be updated first)
     insert_new_brawler_data(conn, brawler_changes_df)
 
     starpower_changes_df = generate_starpower_changes(brawler_starpower_data_database_df,

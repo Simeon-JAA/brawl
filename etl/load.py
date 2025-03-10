@@ -7,8 +7,6 @@ from psycopg2.extensions import connection
 from dotenv import load_dotenv
 from pandas import DataFrame
 
-from extract import get_most_recent_brawler_version, get_most_recent_starpower_version
-from extract import get_most_recent_gadget_version
 
 def get_db_connection(config_env) -> connection:
     """Establishes connection with the database"""
@@ -38,10 +36,10 @@ def insert_new_brawler_data(db_conn: connection, brawler_data: DataFrame):
     for index, brawler in brawler_data.iterrows():
         with db_conn.cursor() as cur:
             try:
-                cur.execute("""INSERT INTO brawler 
+                cur.execute("""INSERT INTO brawler
                             (brawler_id, brawler_version, brawler_name)
-                            VALUES (%s, %s, %s);""", [brawler["brawler_id"], 
-                                                      brawler["brawler_version"], 
+                            VALUES (%s, %s, %s);""", [brawler["brawler_id"],
+                                                      brawler["brawler_version"],
                                                       brawler["brawler_name"]])
             except Exception as exc:
                 raise psycopg2.DatabaseError("Error: Unable to insert brawler data!") from exc
@@ -54,13 +52,13 @@ def insert_new_starpower_data(db_conn: connection, starpower_data: DataFrame):
         raise TypeError("Error: Starpower data is not a dataframe!")
     if starpower_data.empty:
         return
-    
+
     with db_conn.cursor() as cur:
         for index, starpower in starpower_data.iterrows():
             try:
-                cur.execute("""INSERT INTO starpower 
+                cur.execute("""INSERT INTO starpower
                             (starpower_id, starpower_version, starpower_name, brawler_id, brawler_version)
-                            VALUES (%s, %s, %s, %s, %s);""", 
+                            VALUES (%s, %s, %s, %s, %s);""",
                             [starpower["starpower_id"],
                              starpower["starpower_version"] + 1,
                              starpower["starpower_name"],
@@ -81,7 +79,7 @@ def insert_new_gadget_data(db_conn: connection, gadget_data: DataFrame):
     with db_conn.cursor() as cur:
         for index, gadget in gadget_data.iterrows():
             try:
-                cur.execute("""INSERT INTO gadget 
+                cur.execute("""INSERT INTO gadget
                             (gadget_id, gadget_version, gadget_name, brawler_id, brawler_version)
                             VALUES (%s, %s, %s, %s, %s);""",
                             [gadget["gadget_id"],
