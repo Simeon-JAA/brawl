@@ -10,6 +10,37 @@ from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 
 
+## Non extraction functions
+
+def format_player_tag(player_tag: str) -> str:
+    """Formats player tag"""
+
+    if not isinstance(player_tag, str):
+        raise TypeError("Error: Player tag must be a string format!")
+
+    player_tag = player_tag.strip().replace("#", "").upper()
+
+    if not player_tag:
+        raise ValueError("Error: Player tag must not be empty!")
+
+    return player_tag
+
+
+def check_player_tag(player_tag: str) -> bool:
+    """Returns true if player tage is accepted"""
+
+    if len(player_tag) < 3:
+        return False
+
+    allowed_characters = ['P', 'Y', 'L', 'Q', 'G', 'O', 'R', 'J', 'C', 'U', 'V', '0', '2', '8', '9']
+
+    for character in player_tag:
+        if character not in allowed_characters:
+            return False
+
+    return True
+
+
 ## Database Extraction
 def get_db_connection(config_env) -> connection:
     """Establishes connection with the database"""
@@ -204,12 +235,12 @@ def get_api_header(api_token: str) -> dict:
     return header
 
 
-def get_all_brawler_data(api_header: dict) -> list[dict]:
+def get_all_brawler_data(api_header_data: dict) -> list[dict]:
     """Returns all brawler data"""
 
     try:
         response = requests.get("https://api.brawlstars.com/v1/brawlers",
-                                headers=api_header, timeout=5)
+                                headers=api_header_data, timeout=5)
         response_data = response.json()
         brawler_data_all = response_data["items"]
 
@@ -217,6 +248,44 @@ def get_all_brawler_data(api_header: dict) -> list[dict]:
         raise psycopg2.DatabaseError("Error: Unable to return brawler data from API!") from exc
 
     return brawler_data_all
+
+
+def get_api_player_data(api_header_data: str, player_tag: str) -> dict:
+    """Fetches player data from api"""
+
+    player_tag = format_player_tag(player_tag)
+
+    if not check_player_tag(player_tag):
+        raise ValueError("Error: Player tag is invlaid!")
+
+    try:
+        response = requests.get(f"https://api.brawlstars.com/v1/players/%23{player_tag}",
+                          headers=api_header_data, timeout=5)
+        response_data = response.json()
+
+    except Exception as exc:
+        raise ConnectionError("Error: Unable to retrieve player data from API!") from exc
+
+    return response_data
+
+
+def get_api_player_battle_log(api_header_data: str, player_tag: str) -> dict:
+    """Fetches player battle log data from api"""
+
+    player_tag = format_player_tag(player_tag)
+
+    if not check_player_tag(player_tag):
+        raise ValueError("Error: Player tag is invlaid!")
+
+    try:
+        response = requests.get(f"https://api.brawlstars.com/v1/players/%23{player_tag}/battlelog",
+                          headers=api_header_data, timeout=5)
+        response_data = response.json()
+
+    except Exception as exc:
+        raise ConnectionError("Error: Unable to retrieve player data from API!") from exc
+
+    return response_data
 
 
 def extract_brawler_data_api(config_env) -> list[dict]:
@@ -235,6 +304,12 @@ if __name__ =="__main__":
 
     config = environ
 
+    api_header = get_api_header(config["api_token"])
+    bs_player_tag  = config["player_tag"]
+
     brawler_data_database = extract_brawler_data_database(config)
 
     brawler_data_api = extract_brawler_data_api(config)
+
+    player_data = get_api_player_data(api_header, bs_player_tag)
+    player_battle_log = get_api_player_battle_log(api_header, bs_player_tag)
