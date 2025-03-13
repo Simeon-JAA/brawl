@@ -288,7 +288,8 @@ def get_api_player_battle_log(api_header_data: str, player_tag: str) -> dict:
     return response_data
 
 
-def extract_brawler_data_api(config_env) -> list[dict]:
+#TODO DRY 
+def extract_brawler_data_api(config_env: dict) -> list[dict]:
     """Extracts brawler data by get request to the brawl API"""
 
     token = config_env["api_token"]
@@ -296,6 +297,28 @@ def extract_brawler_data_api(config_env) -> list[dict]:
     all_brawler_data = get_all_brawler_data(api_header_data)
 
     return all_brawler_data
+
+
+#TODO DRY
+def extract_player_data_api(config_env: dict, player_tag: str) -> list[dict]:
+    """Extracts brawler data by get request to the brawl API"""
+    
+    token = config_env["api_token"]
+    api_header_data = get_api_header(token)
+    all_player_data = get_api_player_data(api_header_data, player_tag)
+
+    return all_player_data
+
+
+#TODO DRY
+def extract_player_battle_log_api(config_env: dict, player_tag: str) -> list[dict]:
+    """Extracts brawler data by get request to the brawl API"""
+    
+    token = config_env["api_token"]
+    api_header_data = get_api_header(token)
+    all_player_data = get_api_player_battle_log(api_header_data, player_tag)
+
+    return all_player_data
 
 
 if __name__ =="__main__":
