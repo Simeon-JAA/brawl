@@ -6,7 +6,9 @@ import pandas as pd
 from pandas import DataFrame, concat
 from psycopg2.extensions import connection
 
-from extract import get_most_recent_starpower_version, get_most_recent_gadget_version, get_most_recent_brawler_version
+from extract import (get_most_recent_starpower_version, get_most_recent_gadget_version, 
+                     get_most_recent_brawler_version)
+
 
 def brawler_name_value_to_title(brawler_data: dict) -> dict:
     """Apply title() to all values for the 'name' key"""
@@ -225,6 +227,18 @@ def generate_brawler_changes(brawler_db_df: DataFrame, brawler_api_df: DataFrame
 
     return brawler_data_to_load
 
+
+def transform_player_data_api(player_data: dict) -> dict:
+    """Transforms player data to be uploaded to db"""
+
+    desired_keys = ('tag', 'name', 'icon', 'trophies', 'highestTrophies',
+                    'expLevel', 'expPoints', 'isQualifiedFromChampionshipChallenge',
+                    '3vs3Victories', 'soloVictories', 'duoVictories', 'bestRoboRumbleTime')
+    
+    player_data = {to_snake_case(k): v for k, v in player_data.items() if k in desired_keys}
+  
+
+    return player_data
 
 if __name__ =="__main__":
 
