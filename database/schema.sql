@@ -68,10 +68,10 @@ CREATE TABLE player_trophies(
   FOREIGN KEY (player_tag) REFERENCES player (player_tag)
 );
 
-CREATE TABLE player_3v3_vistories (
+CREATE TABLE player_3vs3_victories (
   id SMALLINT GENERATED ALWAYS AS IDENTITY,
   player_tag VARCHAR(255) NOT NULL,
-  3vs3_victories SMALLINT NOT NULL,
+  victories SMALLINT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   PRIMARY KEY (id),
   FOREIGN KEY (player_tag) REFERENCES player (player_tag)
