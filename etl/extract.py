@@ -86,10 +86,10 @@ def get_most_recent_brawler_starpowers(db_connection: connection) -> pd.DataFram
         except Exception as exc:
             raise psycopg2.DatabaseError("Error: Unable to retrieve data from database!") from exc
 
-        if not most_recent_brawler_data:
-            raise LookupError("Error: Database unable to lookup dataa!")
-
-    most_recent_brawler_data_df = pd.DataFrame(most_recent_brawler_data)
+    most_recent_brawler_data_df = pd.DataFrame(data=most_recent_brawler_data,
+                                               columns=("brawler_id", "brawler_name",
+                                                        "starpower_id", "starpower_version",
+                                                        "starpower_name"))
 
     return most_recent_brawler_data_df
 
@@ -121,7 +121,10 @@ def get_most_recent_brawler_gadgets(db_connection: connection) -> pd.DataFrame:
         except Exception as exc:
             raise psycopg2.DatabaseError("Error: Unable to retrieve data from database!") from exc
 
-    most_recent_brawler_data_df = pd.DataFrame(most_recent_brawler_data)
+    most_recent_brawler_data_df = pd.DataFrame(data=most_recent_brawler_data,
+                                               columns=("brawler_id", "brawler_name",
+                                               "gadget_id", "gadget_version",
+                                               "gadget_name"))
 
     return most_recent_brawler_data_df
 
@@ -208,8 +211,8 @@ def get_most_recent_brawler_data(db_connection: connection) -> pd.DataFrame:
         except Exception as exc:
             raise psycopg2.DatabaseError("Error: Unable to retrieve data from database!") from exc
 
-    most_recent_brawler_data_df = pd.DataFrame(most_recent_brawler_data)
-
+    most_recent_brawler_data_df = pd.DataFrame(data=most_recent_brawler_data,
+                                               columns=("brawler_id", "brawler_name"))
     return most_recent_brawler_data_df
 
 
@@ -228,7 +231,7 @@ def get_api_header(api_token: str) -> dict:
     """Returns api header data"""
 
     header = {
-        "Accept": "application/json",
+        # "Accept": "application/json",
         "Authorization": f"Bearer {api_token}"
     }
 
@@ -242,11 +245,11 @@ def get_all_brawler_data(api_header_data: dict) -> list[dict]:
         response = requests.get("https://api.brawlstars.com/v1/brawlers",
                                 headers=api_header_data, timeout=5)
         response_data = response.json()
-        brawler_data_all = response_data["items"]
 
     except Exception as exc:
-        raise psycopg2.DatabaseError("Error: Unable to return brawler data from API!") from exc
+        raise ConnectionError("Error: Unable to return brawler data from API!") from exc
 
+    brawler_data_all = response_data["items"]
     return brawler_data_all
 
 
