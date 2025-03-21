@@ -1,0 +1,24 @@
+api_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjY3ZTg4MzM4LTg1YmMtNDJkZi1iMTZiLTBlMDdhNTY4MWMxMCIsImlhdCI6MTc0MDMxMDIwNywic3ViIjoiZGV2ZWxvcGVyLzM4MDUxODQxLTBiNTEtMzVkNy1hZGVjLTAzMDAwMDc0MjVhYyIsInNjb3BlcyI6WyJicmF3bHN0YXJzIl0sImxpbWl0cyI6W3sidGllciI6ImRldmVsb3Blci9zaWx2ZXIiLCJ0eXBlIjoidGhyb3R0bGluZyJ9LHsiY2lkcnMiOlsiODYuMTUuMTE2LjIyMiJdLCJ0eXBlIjoiY2xpZW50In1dfQ.pQ9e9HYhSidIoEHx0WzubPidUBL-VH_qhsbvlJpMaRkw9pswVh1z5af7BHXglWyXAObxzpdFtb9eX25XDuS3zw"
+dbname = "brawl"
+user = "postgres"
+password = "postgres"
+host = "localhost"
+port = "5432"
+api_port = "433"
+player_tag = "8QC8RP02"
+
+# \c brawl;
+
+# INSERT INTO brawler (brawler_id, brawler_version, brawler_name)
+# VALUES (16000002, 1, 'Bull');
+
+# INSERT INTO starpower (starpower_id, starpower_version, starpower_name, brawler_id, brawler_version)
+# VALUES 
+# (23000078, 1, 'BERSERKER', 16000002,1),
+# (23000137, 1, 'TOUGH GUY', 16000002,1);
+
+# INSERT INTO gadget (gadget_id, gadget_version, gadget_name, brawler_id, brawler_version)
+# VALUES 
+# (23000272, 1, 'T-BONE INJECTOR', 16000002,1),
+# (23000310, 1, 'STOMPER', 16000002,1);
+
